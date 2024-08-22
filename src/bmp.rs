@@ -5,9 +5,11 @@ use std::{
     u32, usize, vec,
 };
 
+use serde::{Deserialize, Serialize};
+
 use crate::utils::{combine_8bits, combine_8bits_signed};
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct BMP {
     file_identifier: String,
     file_size_bytes: u32,

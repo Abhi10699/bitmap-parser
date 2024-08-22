@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BMP Parser</title>
+
+  <style>
+    .container {
+      display: inline;
+    }
+
+  </style>
+</head>
+
+<body>
+  <h1>BMP Parser Output</h1>
+  <div class="container">
+    <pre>Image Constructed from Parsed Pixel Data</pre>
+    <canvas id="render_canvas"></canvas>
+    <table border="2" width="400">
+      <thead>
+        <tr>
+          <td>Property</td>
+          <td>Value</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>File Identifier</td>
+          <td data-key="file_identifier"></td>
+        </tr>
+        <tr>
+          <td>File Size</td>
+          <td data-key="file_size_bytes"></td>
+        </tr>
+        <tr>
+          <td>Pixel Array Address</td>
+          <td data-key="pixel_read_addr"></td>
+        </tr>
+
+        <tr>
+          <td>DIB Header Size</td>
+          <td data-key="dib_header_size"></td>
+        </tr>
+
+        <tr>
+          <td>Image Width</td>
+          <td data-key="image_width"></td>
+        </tr>
+
+        <tr>
+          <td>Image Height</td>
+          <td data-key="image_height"></td>
+        </tr>
+
+        <tr>
+          <td>Num Color Planes</td>
+          <td data-key="num_color_planes"></td>
+        </tr>
+
+        <tr>
+          <td>Bits Per Pixel</td>
+          <td data-key="bits_per_pixel"></td>
+        </tr>
+
+        <tr>
+          <td>Compression Method</td>
+          <td data-key="compression_method_name"></td>
+        </tr>
+
+        <tr>
+          <td>Raw Image Size</td>
+          <td data-key="raw_image_size"></td>
+        </tr>
+
+        <tr>
+          <td>Horizontal Resolution (PPM)</td>
+          <td data-key="resolution_horizontal_ppm"></td>
+        </tr>
+
+        <tr>
+          <td>Vertical Resolution (PPM)</td>
+          <td data-key="resolution_vertical_ppm"></td>
+        </tr>
+
+        <tr>
+          <td>Number of Colors</td>
+          <td data-key="num_colors"></td>
+        </tr>
+
+        <tr>
+          <td>Number of Important Colors</td>
+          <td data-key="num_important_colors"></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+</body>
+
+<script>
+  'use strict';
+
+  const canvas = document.getElementById("render_canvas");
+  const ctx = canvas.getContext('2d');
+
+  async function get_bmp_file() {
+    try {
+      const file_response = await fetch("/api/bmp");
+      const response_json = await file_response.json();
+      return response_json;
+    }
+
+    catch (err) {
+      console.error("Fetch failed.")
+      return null;
+    }
+  }
+
+  window.addEventListener('load', async () => {
+    const image_data = await get_bmp_file();
+
+    canvas.width = image_data.image_width;
+    canvas.height = image_data.image_height;
+
+    const pixel_arr = new Uint8ClampedArray(image_data.pixel_arr_flat);
+    const image = new ImageData(pixel_arr, image_data.image_width, image_data.image_height);
+
+    console.log(image);
+    ctx.putImageData(image, 0, 0);
+
+    Object.keys(image_data).forEach(key => {
+      const elem = document.querySelector(`td[data-key=${key}]`)
+      if (elem) {
+        elem.innerText = image_data[key];
+      }
+    })
+  });
+</script>
+
+</html>
